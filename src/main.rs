@@ -5,14 +5,14 @@ use std::fs;
 #[derive(Debug, Clone)]
 struct Holding {
     name: String,
-    qty: u32,
+    qty: f32,
     price: f32,
     target: f32
 }
 
 impl Holding {
     fn value(&self) -> f32 {
-        self.qty as f32 * self.price
+        self.qty * self.price
     }
 
     fn perc(&self, p_total: f32) -> f32 {
@@ -41,10 +41,10 @@ fn main() {
     let portfolio : Vec<Holding> = fs::read_to_string(portfolio).unwrap().trim().lines()
         .map(|l| l.trim().split(',').collect())
         .map(|l: Vec<&str> | Holding{
-            name: l[0].to_string(),
-            target: l[1].parse().unwrap(),
-            qty: l[2].parse().unwrap(),
-            price: l[3].parse().unwrap()
+            name: l[0].trim().to_string(),
+            target: l[1].trim().parse().unwrap(),
+            qty: l[2].trim().parse().unwrap(),
+            price: l[3].trim().parse().unwrap()
         }).collect();
 
     calculate_trades(&portfolio, deposit);
@@ -59,7 +59,7 @@ fn calculate_trades(old_port: &Vec<Holding>, deposit: f32) {
         let next_to_buy = get_next_to_buy(&mut port);
         let can_buy_next = remaining >= next_to_buy.price;
         if can_buy_next {
-            next_to_buy.qty += 1;
+            next_to_buy.qty += 1.0;
             remaining -= next_to_buy.price;
         } else {
             break;
@@ -85,6 +85,8 @@ fn calculate_trades(old_port: &Vec<Holding>, deposit: f32) {
     }
     println!("remaining: ${:.2}", remaining);
 }
+
+fn rebalance(
 
 fn get_next_to_buy(port: &mut Vec<Holding>) -> &mut Holding {
     let p_total = port.iter()
